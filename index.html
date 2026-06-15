@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>할일 관리</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>할일 관리</h1>
+      <button type="button" class="btn btn-primary" id="openModalBtn">새로운할일추가</button>
+    </header>
+
+    <section class="section" id="todaySection">
+      <h2 class="section-title">오늘의 할일</h2>
+      <p class="today-date" id="todayDate"></p>
+      <ul class="todo-list" id="todayList"></ul>
+      <p class="empty-message" id="todayEmpty">오늘 예정된 할일이 없습니다.</p>
+    </section>
+
+    <section class="section" id="viewSection">
+      <div class="view-toggle">
+        <button type="button" class="btn view-toggle-btn active" id="listViewBtn">목록으로 보기</button>
+        <button type="button" class="btn view-toggle-btn" id="calendarViewBtn">달력으로 보기</button>
+      </div>
+
+      <div id="listViewPanel">
+        <h2 class="section-title view-panel-title">전체 할일 목록</h2>
+        <ul class="todo-list" id="allList"></ul>
+        <p class="empty-message" id="allEmpty">등록된 할일이 없습니다. 새로운 할일을 추가해 보세요.</p>
+      </div>
+
+      <div id="calendarViewPanel" hidden>
+        <div class="calendar-nav">
+          <button type="button" class="btn-icon calendar-nav-btn" id="prevMonthBtn" aria-label="이전 달">&lsaquo;</button>
+          <h2 class="calendar-month-title" id="calendarMonthTitle"></h2>
+          <button type="button" class="btn-icon calendar-nav-btn" id="nextMonthBtn" aria-label="다음 달">&rsaquo;</button>
+        </div>
+        <div class="calendar-layout">
+          <div class="calendar-weekdays">
+            <span>일</span>
+            <span>월</span>
+            <span>화</span>
+            <span>수</span>
+            <span>목</span>
+            <span>금</span>
+            <span>토</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+        <p class="empty-message calendar-empty hidden" id="calendarEmpty">이 달에 등록된 할일이 없습니다.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+      <div class="modal-header">
+        <h2 id="modalTitle">새로운 할일 추가</h2>
+        <button type="button" class="btn-icon" id="closeModalBtn" aria-label="닫기">&times;</button>
+      </div>
+      <form id="todoForm">
+        <div class="form-group">
+          <label for="todoTitle">제목</label>
+          <input type="text" id="todoTitle" name="title" placeholder="할일 제목을 입력하세요" required>
+        </div>
+        <div class="form-group">
+          <label for="todoDetail">상세 내용</label>
+          <textarea id="todoDetail" name="detail" rows="4" placeholder="할일에 대한 상세 내용을 입력하세요"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="todoDate">날짜</label>
+            <input type="date" id="todoDate" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="todoTime">시간</label>
+            <input type="time" id="todoTime" name="time" required>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">취소</button>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="detailModalOverlay" hidden>
+    <div class="modal" role="dialog" aria-labelledby="detailModalTitle" aria-modal="true">
+      <div class="modal-header">
+        <h2 id="detailModalTitle">할일 상세</h2>
+        <button type="button" class="btn-icon" id="closeDetailModalBtn" aria-label="닫기">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="detailTitle">제목</label>
+          <input type="text" id="detailTitle" readonly>
+        </div>
+        <div class="form-group">
+          <label for="detailContent">상세 내용</label>
+          <textarea id="detailContent" rows="4" readonly></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="detailDate">날짜</label>
+            <input type="date" id="detailDate" readonly>
+          </div>
+          <div class="form-group">
+            <label for="detailTime">시간</label>
+            <input type="time" id="detailTime" readonly>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <div class="modal-actions-left">
+            <button type="button" class="btn btn-secondary" id="detailEditBtn">편집</button>
+            <button type="button" class="btn btn-success" id="detailToggleCompleteBtn">완료</button>
+          </div>
+          <button type="button" class="btn btn-primary" id="detailCloseBtn">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
