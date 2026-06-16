@@ -1,5 +1,3 @@
-const STORAGE_KEY = "todo-app-items";
-
 const openModalBtn = document.getElementById("openModalBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const cancelBtn = document.getElementById("cancelBtn");
@@ -31,26 +29,13 @@ const calendarEmpty = document.getElementById("calendarEmpty");
 const prevMonthBtn = document.getElementById("prevMonthBtn");
 const nextMonthBtn = document.getElementById("nextMonthBtn");
 
-let todos = loadTodos();
+let todos = [];
 let detailTodoId = null;
 let detailEditMode = false;
 let currentView = "list";
 const now = new Date();
 let calendarYear = now.getFullYear();
 let calendarMonth = now.getMonth();
-
-function loadTodos() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveTodos() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-}
 
 function getTodayString() {
   const now = new Date();
@@ -357,14 +342,14 @@ function saveDetailEdit() {
 
   if (!title || !date || !time) return;
 
-  todo.title = title;
-  todo.detail = detail;
-  todo.date = date;
-  todo.time = time;
-
-  saveTodos();
-  render();
-  exitDetailEditMode();
+  updateTodoInFirebase(detailTodoId, { title, detail, date, time })
+    .then(() => {
+      exitDetailEditMode();
+    })
+    .catch((error) => {
+      console.error("Firebase 수정 실패:", error);
+      alert("할일 수정에 실패했습니다. 다시 시도해 주세요.");
+    });
 }
 
 function handleDetailEdit() {
@@ -402,34 +387,31 @@ function addTodo(event) {
 
   if (!title || !date || !time) return;
 
-  todos.push({
-    id: crypto.randomUUID(),
-    title,
-    detail,
-    date,
-    time,
-    completed: false,
-    createdAt: Date.now(),
-  });
-
-  saveTodos();
-  render();
-  closeModal();
+  addTodoToFirebase({ title, detail, date, time })
+    .then(() => {
+      closeModal();
+    })
+    .catch((error) => {
+      console.error("Firebase 저장 실패:", error);
+      alert("Firebase에 저장하지 못했습니다. 다시 시도해 주세요.");
+    });
 }
 
 function toggleTodo(id) {
   const todo = todos.find((item) => item.id === id);
-  if (todo) {
-    todo.completed = !todo.completed;
-    saveTodos();
-    render();
-  }
+  if (!todo) return;
+
+  updateTodoInFirebase(id, { completed: !todo.completed }).catch((error) => {
+    console.error("Firebase 수정 실패:", error);
+    alert("상태 변경에 실패했습니다. 다시 시도해 주세요.");
+  });
 }
 
 function deleteTodo(id) {
-  todos = todos.filter((item) => item.id !== id);
-  saveTodos();
-  render();
+  deleteTodoFromFirebase(id).catch((error) => {
+    console.error("Firebase 삭제 실패:", error);
+    alert("할일 삭제에 실패했습니다. 다시 시도해 주세요.");
+  });
 }
 
 openModalBtn.addEventListener("click", openModal);
@@ -459,4 +441,12 @@ document.addEventListener("keydown", (event) => {
   else if (!detailModalOverlay.hidden) closeDetailModal();
 });
 
-render();
+subscribeTodos(
+  (loadedTodos) => {
+    todos = loadedTodos;
+    render();
+  },
+  () => {
+    alert("할일 목록을 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
+  }
+);
